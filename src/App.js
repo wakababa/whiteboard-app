@@ -3,13 +3,14 @@ import rough from "roughjs/bundled/rough.esm";
 import "./App.css";
 import Swatch from "./components/swatch";
 import {
-  adjustElementCoordinates, colorArray,
+  adjustElementCoordinates,
   createElement,
   cursorForPosition,
   getElementAtPosition,
   resizedCoordinates
 } from "./utils";
 
+const Colors=({onPickColor})=> <input style={{width:45,height:45}} type={"color"} onBlur={(e,value)=>onPickColor(e.target.value)} />
 
 function App() {
   const [elements, setElements] = useState([]);
@@ -19,12 +20,8 @@ function App() {
   const [action, setAction] = useState("none");
   const [toolType, setToolType] = useState("pencil");
   const [selectedElement, setSelectedElement] = useState(null);
-  const [colorWidth, setColorWidth] = useState({
-    hex: "#000",
-    hsv: {},
-    rgb: {},
-  });
-  const [width, setWidth] = useState(1);
+  const [color,setColor] = useState("#000")
+
   const [popped, setPopped] = useState(false);
   const [shapeWidth, setShapeWidth] = useState(1);
 
@@ -57,12 +54,12 @@ function App() {
     context.save();
     const roughCanvas = rough.canvas(canvas);
 
-    elements.forEach(({stroke,index, type, roughElement ,...props}) => {
+    elements.forEach(({stroke,index, type, roughElement,strokeColor ,...props}) => {
       if(type === "pencil"){
         context.beginPath();
         props.data.forEach((point, i) => {
-          var midPoint = midPointBtw(point.clientX, point.clientY);
-          context.strokeStyle = colorArray[index];
+          let midPoint = midPointBtw(point.clientX, point.clientY);
+          context.strokeStyle =  strokeColor;
           context.quadraticCurveTo(
               point.clientX,
               point.clientY,
@@ -85,8 +82,8 @@ function App() {
     };
   }, [elements]);
 
-  const updateElement = (index, x1, y1, x2, y2, toolType) => {
-    const updatedElement = createElement(index, x1, y1, x2, y2, toolType, 1, "#000");
+  const updateElement = (index, x1, y1, x2, y2, toolType,strokeColor) => {
+    const updatedElement = createElement(index, x1, y1, x2, y2, toolType, 1, strokeColor);
     const elementsCopy = [...elements];
     elementsCopy[index] = updatedElement;
     setElements(elementsCopy);
@@ -95,7 +92,6 @@ function App() {
   const handleMouseDown = (e) => {
    const { clientX, clientY }= getMousePosition(document.getElementById("canvas"),e)
    const {context} = getCanvas()
-    const id = elements.length;
 
     if (toolType === "select") {
       const element = getElementAtPosition(clientX, clientY, elements);
@@ -117,19 +113,18 @@ function App() {
         setAction("sketching");
         setIsDrawing(true);
        // TODO Here need to be generic
-        const newColour = "black";
         const newLineWidth = 1;
         const transparency = toolType === "brush" ? "0.1" : "1.0";
         const newEle = {
           clientX,
           clientY,
-          newColour,
+          color,
           newLineWidth,
           transparency,
         };
         setPoints((state) => [...state, newEle]);
 
-        context.strokeStyle = newColour;
+        context.strokeStyle = color;
         context.lineWidth = newLineWidth;
         context.lineCap = 5;
         context.moveTo(clientX, clientY);
@@ -137,7 +132,6 @@ function App() {
       } else {
         setAction("drawing");
         // TODO Here need to be generic
-        const newColour = "black";
         const newWidth = 1;
         const element = createElement(
             id,
@@ -147,7 +141,7 @@ function App() {
             clientY,
             toolType,
             newWidth,
-            newColour
+            color
         );
         setElements((prevState) => [...prevState, element]);
         setSelectedElement(element);
@@ -211,14 +205,14 @@ function App() {
           strokeColor
       );
     } else if (action === "resize") {
-      const { id, type, position, ...coordinates } = selectedElement;
+      const { id, type, position,strokeColor, ...coordinates } = selectedElement;
       const { x1, y1, x2, y2 } = resizedCoordinates(
           clientX,
           clientY,
           position,
           coordinates
       );
-      updateElement(id, x1, y1, x2, y2, type, shapeWidth, colorWidth.hex);
+      updateElement(id, x1, y1, x2, y2, type, shapeWidth,strokeColor);
     }
 
   };
@@ -230,10 +224,10 @@ function App() {
       updateElement(id, x1, y1, x2, y2, type, strokeWidth, strokeColor);
     } else if (action === "drawing") {
       const index = selectedElement.id;
-      const { id, type, strokeWidth } = elements[index];
+      const { id, type, strokeWidth ,strokeColor } = elements[index];
       const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
       // TODO GENERIC
-      updateElement(id, x1, y1, x2, y2, type, strokeWidth, "#000");
+      updateElement(id, x1, y1, x2, y2, type, strokeWidth, strokeColor);
     } else if (action === "sketching") {
       const {canvas,context} = getCanvas()
       context.closePath();
@@ -241,18 +235,19 @@ function App() {
       setPoints([]);
       setElements((prevState) => [...prevState, {
         type:"pencil",
-        data:element
+        data:element,
+        strokeColor:color
       }]); //tuple
       setIsDrawing(false);
     }
     setAction("none");
   };
 
-
   return (
     <div>
       <div>
         <Swatch setToolType={setToolType} />
+        <Colors onPickColor={(val)=>setColor(val)} />
       </div>
       <div>
         <button onClick={undo}>Undo</button>
