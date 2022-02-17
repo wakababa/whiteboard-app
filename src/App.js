@@ -115,13 +115,18 @@ function App() {
       context.lineCap = 5;
       context.moveTo(clientX, clientY);
       context.beginPath();
-    } else {
+    } else if(toolType === "line") {
       setAction("drawing");
       const element = createElement(id, clientX, clientY, clientX, clientY);
 
       setElements((prevState) => [...prevState, element]);
       setSelectedElement(element);
       console.log(elements);
+    } else if(toolType === "select") {
+
+    }
+    else{
+      return
     }
   };
 

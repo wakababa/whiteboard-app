@@ -6,6 +6,14 @@ export default function Swatch({ setToolType }) {
       <div className="row">
         <div className="col-md-12">
           <div>
+              <button
+                  title="Select"
+                  onClick={() => {
+                      setToolType("select");
+                  }}
+              >
+                  Select
+              </button>
             <button
               title="Pencil"
               onClick={() => {
