@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import rough from "roughjs/bundled/rough.esm";
 import "./App.css";
-import Swatch from "./components/swatch";
+import Menu from "./components/Menu";
 import {
   adjustElementCoordinates,
   createElement,
@@ -245,14 +245,14 @@ function App() {
 
   return (
     <div>
-      <div>
-        <Swatch setToolType={setToolType} />
+
+      <div style={{display:"flex",gap:1,backgroundColor:"#ebebeb"}}>
+        <Menu toolType={toolType} setToolType={setToolType} />
         <Colors onPickColor={(val)=>setColor(val)} />
-      </div>
-      <div>
         <button onClick={undo}>Undo</button>
       </div>
       <canvas
+        style={{backgroundColor:"rgb(249 249 249)"}}
         id="canvas"
         className="App"
         width={window.innerWidth}
@@ -260,9 +260,7 @@ function App() {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-      >
-        Canvas
-      </canvas>
+      />
     </div>
   );
 }
