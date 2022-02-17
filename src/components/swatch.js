@@ -30,6 +30,14 @@ export default function Swatch({ setToolType }) {
             >
               Line
             </button>
+              <button
+                  title="Rectangl"
+                  onClick={() => {
+                      setToolType("rectangle");
+                  }}
+              >
+                  Rectangle
+              </button>
           </div>
         </div>
       </div>
