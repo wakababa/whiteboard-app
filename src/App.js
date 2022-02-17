@@ -82,7 +82,8 @@ function App() {
     };
   }, [elements]);
 
-  const updateElement = (index, x1, y1, x2, y2, toolType,strokeColor) => {
+  const updateElement = (index, x1, y1, x2, y2, toolType,strokeColor,process) => {
+    console.log("strokeColor",strokeColor,process)
     const updatedElement = createElement(index, x1, y1, x2, y2, toolType, 1, strokeColor);
     const elementsCopy = [...elements];
     elementsCopy[index] = updatedElement;
@@ -129,6 +130,7 @@ function App() {
         context.lineCap = 5;
         context.moveTo(clientX, clientY);
         context.beginPath();
+
       } else {
         setAction("drawing");
         // TODO Here need to be generic
@@ -172,9 +174,9 @@ function App() {
     }
      else if (action === "drawing") {
       const index = elements.length - 1;
-      const { x1, y1 } = elements[index];
+      const { x1, y1 , strokeColor } = elements[index];
 
-      updateElement(index, x1, y1, clientX, clientY, toolType);
+      updateElement(index, x1, y1, clientX, clientY, toolType,strokeColor,"sketching-move");
     }
     else if (action === "moving") {
       const {
@@ -202,7 +204,8 @@ function App() {
           newY + offsetHeight,
           type,
           shapeWidth,
-          strokeColor
+          strokeColor,
+          "moving"
       );
     } else if (action === "resize") {
       const { id, type, position,strokeColor, ...coordinates } = selectedElement;
@@ -212,7 +215,7 @@ function App() {
           position,
           coordinates
       );
-      updateElement(id, x1, y1, x2, y2, type, shapeWidth,strokeColor);
+      updateElement(id, x1, y1, x2, y2, type, shapeWidth,strokeColor,"resize");
     }
 
   };
@@ -221,13 +224,13 @@ function App() {
       const index = selectedElement.id;
       const { id, type, strokeWidth, strokeColor } = elements[index];
       const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
-      updateElement(id, x1, y1, x2, y2, type, strokeWidth, strokeColor);
+      updateElement(id, x1, y1, x2, y2, type, strokeColor,"resize");
     } else if (action === "drawing") {
       const index = selectedElement.id;
       const { id, type, strokeWidth ,strokeColor } = elements[index];
       const { x1, y1, x2, y2 } = adjustElementCoordinates(elements[index]);
       // TODO GENERIC
-      updateElement(id, x1, y1, x2, y2, type, strokeWidth, strokeColor);
+      updateElement(id, x1, y1, x2, y2, type, strokeColor,"drawing");
     } else if (action === "sketching") {
       const {canvas,context} = getCanvas()
       context.closePath();

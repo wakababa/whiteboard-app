@@ -29,8 +29,9 @@ export default function Menu({toolType,setToolType}) {
     return (
         <div style={{display: "flex", flexDirection: "row"}}>
             {
-                menus.map(m =>
+                menus.map((m,key) =>
                     <button
+                        key={key}
                         onClick={() => {
                             setSelected(m.title)
                             setToolType(m.title)
