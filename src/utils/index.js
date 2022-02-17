@@ -1,6 +1,7 @@
 import rough from "roughjs/bundled/rough.esm";
 const generator = rough.generator();
 
+// Check position of mouse on resize && move
 export const cursorForPosition = (position) => {
     switch (position) {
         case "tl":
@@ -15,6 +16,7 @@ export const cursorForPosition = (position) => {
             return "move";
     }
 };
+// Move drawings coordinates by mouse positions
 export const resizedCoordinates = (clientX, clientY, position, coordinates) => {
     const { x1, y1, x2, y2 } = coordinates;
     switch (position) {
@@ -32,6 +34,7 @@ export const resizedCoordinates = (clientX, clientY, position, coordinates) => {
             return null;
     }
 };
+// Create Element by Rough library
 export function createElement(id, x1, y1, x2, y2, type, width, strokeColor) {
     let roughElement = null;
     //console.log("calling create element....");
@@ -89,6 +92,8 @@ export function createElement(id, x1, y1, x2, y2, type, width, strokeColor) {
         strokeColor,
     };
 }
+
+// Adjust to new Coordinates for Resize or Use  for drawing
 export const adjustElementCoordinates = (element) => {
     const { type, x1, y1, x2, y2 } = element;
     if (x1 < x2 || (x1 === x2 && y1 < y2)) {
@@ -97,12 +102,15 @@ export const adjustElementCoordinates = (element) => {
         return { x1: x2, y1: y2, x2: x1, y2: y1 };
     }
 };
+
 const nearPoint = (x, y, x1, y1, name) => {
     return Math.abs(x - x1) < 5 && Math.abs(y - y1) < 5 ? name : null;
 };
 const distance = (a, b) =>
     Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
+
+// Position check every corner
 const positionWithinElement = (x, y, element) => {
     const { type, x1, x2, y1, y2 } = element;
     if (type === "rectangle") {

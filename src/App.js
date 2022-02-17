@@ -31,7 +31,7 @@ function App() {
   const [shapeWidth, setShapeWidth] = useState(1);
 
 
-  function getMousePos(canvas, evt) {
+  function getMousePosition(canvas, evt) {
     const rect = canvas.getBoundingClientRect();
     return {
       clientX: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
@@ -108,9 +108,7 @@ function App() {
   };
 
   const handleMouseDown = (e) => {
-    console.log(toolType);
-
-   const { clientX, clientY }= getMousePos(document.getElementById("canvas"),e)
+   const { clientX, clientY }= getMousePosition(document.getElementById("canvas"),e)
 
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
@@ -183,7 +181,7 @@ function App() {
   const handleMouseMove = (e) => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
-    const { clientX, clientY }= getMousePos(canvas,e)
+    const { clientX, clientY }= getMousePosition(canvas,e)
 
     if (toolType === "select") {
       const element = getElementAtPosition(clientX, clientY, elements);
