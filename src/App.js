@@ -149,8 +149,6 @@ function App() {
   const [isDrawing, setIsDrawing] = useState(false);
 
   const [points, setPoints] = useState([]);
-  const [path, setPath] = useState([]);
-
   const [action, setAction] = useState("none");
   const [toolType, setToolType] = useState("pencil");
   const [selectedElement, setSelectedElement] = useState(null);
@@ -172,7 +170,7 @@ function App() {
     };
   }
 
-  const undo=()=>setPath(path.slice(0, -1))
+  const undo=()=>setElements(elements.slice(0, -1))
 
 
   const colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
@@ -193,39 +191,39 @@ function App() {
 
     context.save();
 
-    const drawpath = () => {
-      path.forEach((stroke, index) => {
+
+
+    const roughCanvas = rough.canvas(canvas);
+
+
+
+    elements.forEach(({stroke,index, type, roughElement ,...props}) => {
+      if(type === "pencil"){
         context.beginPath();
-        stroke.forEach((point, i) => {
+        props.data.forEach((point, i) => {
           var midPoint = midPointBtw(point.clientX, point.clientY);
           context.strokeStyle = colorArray[index];
           context.quadraticCurveTo(
-            point.clientX,
-            point.clientY,
-            midPoint.x,
-            midPoint.y
+              point.clientX,
+              point.clientY,
+              midPoint.x,
+              midPoint.y
           );
           context.lineTo(point.clientX, point.clientY);
           context.stroke();
         });
         context.closePath();
         context.save();
-      });
-    };
-
-    const roughCanvas = rough.canvas(canvas);
-
-    if (path !== undefined) drawpath();
-
-    elements.forEach(({ roughElement }) => {
-      context.globalAlpha = "1";
-      roughCanvas.draw(roughElement);
+      }else{
+        context.globalAlpha = "1";
+        roughCanvas.draw(roughElement);
+      }
     });
 
     return () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
     };
-  }, [elements, path]);
+  }, [elements]);
 
   const updateElement = (index, x1, y1, x2, y2, toolType) => {
     const updatedElement = createElement(index, x1, y1, x2, y2, toolType, 1, "#000");
@@ -234,40 +232,6 @@ function App() {
     setElements(elementsCopy);
   };
 
-  const checkPresent = (clientX, clientY) => {
-    if (path === undefined) return;
-    var newPath = path;
-    path.forEach((stroke, index) => {
-      stroke.forEach((point, i) => {
-        if (
-            clientY < point.clientY + 10 &&
-            clientY > point.clientY - 10 &&
-            clientX < point.clientX + 10 &&
-            clientX > point.clientX - 10
-        ) {
-          //console.log("Popped");
-          newPath.splice(index, 1);
-          setPopped(true);
-          setPath(newPath);
-          return;
-        }
-      });
-    });
-    const newElements = elements;
-    newElements.forEach((ele, index) => {
-      if (
-          clientX >= ele.x1 &&
-          clientX <= ele.x2 &&
-          clientY >= ele.y1 &&
-          clientY <= ele.y2
-      ) {
-        console.log("Popped....");
-        newElements.splice(index, 1);
-        setPopped(true);
-        setElements(newElements);
-      }
-    });
-  };
   const handleMouseDown = (e) => {
     console.log(toolType);
 
@@ -293,7 +257,9 @@ function App() {
     } else if (toolType === "eraser") {
       setAction("erasing");
 
+/*
       checkPresent(clientX, clientY);
+*/
     } else {
       const id = elements.length;
       if (toolType === "pencil" || toolType === "brush") {
@@ -424,7 +390,10 @@ function App() {
       context.closePath();
       const element = points;
       setPoints([]);
-      setPath((prevState) => [...prevState, element]); //tuple
+      setElements((prevState) => [...prevState, {
+        type:"pencil",
+        data:element
+      }]); //tuple
       setIsDrawing(false);
     }
     setAction("none");
