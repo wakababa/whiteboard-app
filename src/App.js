@@ -35,7 +35,13 @@ function App() {
   const [action, setAction] = useState("none");
   const [toolType, setToolType] = useState("pencil");
   const [selectedElement, setSelectedElement] = useState(null);
-
+  function getMousePos(canvas, evt) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      clientX: (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width,
+      clientY: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
+    };
+  }
   useEffect(() => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
@@ -50,7 +56,6 @@ function App() {
 
         stroke.forEach((point, i) => {
           var midPoint = midPointBtw(point.clientX, point.clientY);
-
           context.quadraticCurveTo(
             point.clientX,
             point.clientY,
@@ -88,7 +93,9 @@ function App() {
 
   const handleMouseDown = (e) => {
     console.log(toolType);
-    const { clientX, clientY } = e;
+
+   const { clientX, clientY }= getMousePos(document.getElementById("canvas"),e)
+
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
 
@@ -121,7 +128,7 @@ function App() {
   const handleMouseMove = (e) => {
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
-    const { clientX, clientY } = e;
+    const { clientX, clientY }= getMousePos(canvas,e)
 
     if (action === "sketching") {
       if (!isDrawing) return;
@@ -158,6 +165,8 @@ function App() {
     }
     setAction("none");
   };
+
+
   return (
     <div>
       <div>
