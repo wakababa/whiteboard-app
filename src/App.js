@@ -10,7 +10,7 @@ import {
   resizedCoordinates
 } from "./utils";
 
-const Colors=({onPickColor})=> <input style={{width:45,height:45}} type={"color"} onBlur={(e,value)=>onPickColor(e.target.value)} />
+const Colors=({onPickColor})=> <input style={{width:45,height:45}} type={"color"} onChange={(e,value)=>onPickColor(e.target.value)} />
 
 function App() {
   const [elements, setElements] = useState([]);
