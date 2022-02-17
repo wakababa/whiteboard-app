@@ -3,14 +3,12 @@ import rough from "roughjs/bundled/rough.esm";
 import "./App.css";
 import Swatch from "./components/swatch";
 import {
-  adjustElementCoordinates,
+  adjustElementCoordinates, colorArray,
   createElement,
   cursorForPosition,
   getElementAtPosition,
   resizedCoordinates
 } from "./utils";
-
-
 
 
 function App() {
@@ -38,7 +36,11 @@ function App() {
       clientY: (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height
     };
   }
-
+  const getCanvas=()=>{
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+    return {canvas,context}
+  }
   const undo=()=>setElements(elements.slice(0, -1))
 
   const midPointBtw = (p1, p2) => {
@@ -47,30 +49,13 @@ function App() {
       y: p1.y + (p2.y - p1.y) / 2,
     };
   };
-  const colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
-    '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
-    '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
-    '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
-    '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
-    '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
-    '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680',
-    '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933',
-    '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
-    '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
+
   useEffect(() => {
-    const canvas = document.getElementById("canvas");
-    const context = canvas.getContext("2d");
+    const {canvas,context} = getCanvas()
     context.lineCap = "round";
     context.lineJoin = "round";
-
     context.save();
-
-
-
     const roughCanvas = rough.canvas(canvas);
-
-
-
 
     elements.forEach(({stroke,index, type, roughElement ,...props}) => {
       if(type === "pencil"){
@@ -109,10 +94,7 @@ function App() {
 
   const handleMouseDown = (e) => {
    const { clientX, clientY }= getMousePosition(document.getElementById("canvas"),e)
-
-    const canvas = document.getElementById("canvas");
-    const context = canvas.getContext("2d");
-
+   const {context} = getCanvas()
     const id = elements.length;
 
     if (toolType === "select") {
@@ -129,10 +111,6 @@ function App() {
       }
     } else if (toolType === "eraser") {
       setAction("erasing");
-
-/*
-      checkPresent(clientX, clientY);
-*/
     } else {
       const id = elements.length;
       if (toolType === "pencil" || toolType === "brush") {
@@ -171,7 +149,6 @@ function App() {
             newWidth,
             newColour
         );
-
         setElements((prevState) => [...prevState, element]);
         setSelectedElement(element);
       }
@@ -179,8 +156,7 @@ function App() {
   };
 
   const handleMouseMove = (e) => {
-    const canvas = document.getElementById("canvas");
-    const context = canvas.getContext("2d");
+    const {canvas,context} = getCanvas()
     const { clientX, clientY }= getMousePosition(canvas,e)
 
     if (toolType === "select") {
@@ -189,17 +165,18 @@ function App() {
           ? cursorForPosition(element.position)
           : "default";
     }
+
      if (action === "sketching") {
       if (!isDrawing) return;
       const transparency = points[points.length - 1].transparency;
       const newEle = { clientX, clientY, transparency };
-
       setPoints((state) => [...state, newEle]);
-      var midPoint = midPointBtw(clientX, clientY);
+      let midPoint = midPointBtw(clientX, clientY);
       context.quadraticCurveTo(clientX, clientY, midPoint.x, midPoint.y);
       context.lineTo(clientX, clientY);
       context.stroke();
-    } else if (action === "drawing") {
+    }
+     else if (action === "drawing") {
       const index = elements.length - 1;
       const { x1, y1 } = elements[index];
 
@@ -258,8 +235,7 @@ function App() {
       // TODO GENERIC
       updateElement(id, x1, y1, x2, y2, type, strokeWidth, "#000");
     } else if (action === "sketching") {
-      const canvas = document.getElementById("canvas");
-      const context = canvas.getContext("2d");
+      const {canvas,context} = getCanvas()
       context.closePath();
       const element = points;
       setPoints([]);
