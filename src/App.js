@@ -22,7 +22,6 @@ function App() {
   const [selectedElement, setSelectedElement] = useState(null);
   const [color,setColor] = useState("#000")
 
-  const [popped, setPopped] = useState(false);
   const [shapeWidth, setShapeWidth] = useState(1);
 
 
